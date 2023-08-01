@@ -1,0 +1,10 @@
+const express=require('express')
+const bodyparser=require('body-parser')
+const userrouter=require('./Views/user')
+const app=express()
+const mongoose=require('mongoose')
+mongoose.connect("mongodb://localhost/E-commerce");
+app.use(bodyparser.json()) 
+app.use('/api/users',userrouter)
+app.use('/api/admin',()=>{})
+app.listen(3000)
