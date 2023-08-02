@@ -76,8 +76,14 @@ module.exports = {
     }
   },
   ViewProductById: async (req, res) => {
-    const prod = await productSchema.find();
-    res.json(prod[req.params.id]);
+    
+  const prod = await productSchema.findById(req.params.id);
+    if (prod) {
+      
+      res.json(prod);
+    } else {
+      res.sendStatus(404)
+    }
   },
   addToCart: async (req, res) => {
     const user = await userSchema.find({ _id: req.params.id });
