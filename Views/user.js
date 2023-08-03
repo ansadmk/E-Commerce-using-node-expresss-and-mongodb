@@ -12,6 +12,7 @@ const {
   addToWishList,
   showWishList,
   deletewishListItems,
+  stripe
 } = require("../Controller/userController");
 userrouter.post("/login", login);
 userrouter.post("/register", register);
@@ -27,4 +28,5 @@ userrouter.get("/:id/cart", auth, showCart);
 userrouter.post("/:id/wishlists/", auth, addToWishList);
 userrouter.get("/:id/wishlists", auth, showWishList);
 userrouter.delete("/:id/wishlists", auth, deletewishListItems);
+userrouter.post('/purchase',auth,stripe)
 module.exports = userrouter;

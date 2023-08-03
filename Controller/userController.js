@@ -21,8 +21,7 @@ module.exports = {
         password: password,
       });
       const userdetails = {
-        username: user[0].username,
-        password: user[0].password,
+        id:user[0]._id
       };
       const token = jwt.sign(userdetails, process.env.ACCESS_TOKEN_SECRET);
       if (token) {
@@ -43,6 +42,7 @@ module.exports = {
         const verify = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
         if (verify) {
+          res.token=verify
           next();
         }
       } else {
@@ -151,4 +151,18 @@ module.exports = {
       res.sendStatus(404);
     }
   },
+  stripe:async (req,res)=>{
+    try {
+      
+      const stripe=require('stripe')(process.env.STRIPE_SECRET_KEY)
+      const customerid=stripe.customer.create(res.token)
+      const session=stripe.checkout.sessions.create({
+
+      })
+      
+    } catch (error) {
+      
+    }
+    
+  }
 };
