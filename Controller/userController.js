@@ -188,16 +188,48 @@ module.exports = {
   },
   stripe:async (req,res,next)=>{
     try {
-      
       const stripe=require('stripe')(process.env.STRIPE_SECRET_KEY)
-      const customerid=stripe.customer.create(res.token)
-      const session=stripe.checkout.sessions.create({
-
-      })
+      const user=await userSchema.find({_id:res.token.id}).populate('cart') 
+      const cartitems= user[0].cart.map((a)=>{
+        return {price_data: {
+          currency: 'usd',
+          product_data: {
+            name: a.title,
+            description:a.description,
+          
+          },
+          unit_amount: a.price*100,
+        },
+        quantity: 1,
+    }})
+      
+      const session = await stripe.checkout.sessions.create({
+        line_items: cartitems,
+        mode: 'payment',
+        success_url: `http://localhost:3000/api/users/purchaseSuccess`,
+        cancel_url: `http://localhost:3000/api/users/purchaseCancel`,
+      });
+      console.log(session);
+      res.json({url:session.url});
       
     } catch (error) {
       next(error)
     }
     
+  },
+  success:async (req,res,next)=>{
+    try {
+      res.json({status:JSON.stringify(req.query.data)})
+    } catch (error) {
+      next(error)
+    }
+  },
+  cancel:async (req,res,next)=>{
+    try {
+      res.json({status:"failed"})
+    } catch (error) {
+      next(error)
+    }
   }
+
 };
