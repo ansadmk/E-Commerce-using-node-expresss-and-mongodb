@@ -1,9 +1,10 @@
 const express = require("express");
 const userrouter = express.Router();
+const userAuth=require('../middlewares/userAuth')
 const {
   register,
   login,
-  auth,
+  
   ViewProductsByCatagory,
   ViewProductById,
   addToCart,
@@ -19,19 +20,19 @@ const {
 } = require("../Controller/userController");
 userrouter.post("/login", login);
 userrouter.post("/register", register);
-userrouter.get("/products", auth, ViewProducts);
-userrouter.get("/products/:id", auth, ViewProductById);
+userrouter.get("/products", userAuth, ViewProducts);
+userrouter.get("/products/:id", userAuth, ViewProductById);
 userrouter.get(
   "/products/category/:categoryname",
-  auth,
+  userAuth,
   ViewProductsByCatagory
 );
-userrouter.post("/:id/cart", auth, addToCart);
-userrouter.get("/:id/cart", auth, showCart);
-userrouter.post("/:id/wishlists/", auth, addToWishList);
-userrouter.get("/:id/wishlists", auth, showWishList);
-userrouter.delete("/:id/wishlists", auth, deletewishListItems);
-userrouter.get('/purchase',auth,stripe)
-userrouter.get('/purchaseSuccess',success)
+userrouter.post("/:id/cart", userAuth, addToCart);
+userrouter.get("/:id/cart", userAuth, showCart);
+userrouter.post("/:id/wishlists/", userAuth, addToWishList);
+userrouter.get("/:id/wishlists", userAuth, showWishList);
+userrouter.delete("/:id/wishlists", userAuth, deletewishListItems);
+userrouter.get('/purchase',userAuth,stripe)
+userrouter.get('/purchaseSuccess/:data',success)
 userrouter.get('/purchasecancel',cancel)
 module.exports = userrouter;

@@ -202,16 +202,26 @@ module.exports = {
         },
         quantity: 1,
     }})
-      
-      const session = await stripe.checkout.sessions.create({
-        line_items: cartitems,
-        mode: 'payment',
-        success_url: `http://localhost:3000/api/users/purchaseSuccess`,
-        cancel_url: `http://localhost:3000/api/users/purchaseCancel`,
-      });
-      console.log(session);
-      res.json({url:session.url});
-      
+      if (cartitems) {
+        
+        const session = await stripe.checkout.sessions.create({
+          line_items: cartitems,
+          mode: 'payment',
+          success_url: `http://localhost:3000/api/users/purchaseSuccess/${this}`,
+          cancel_url: `http://localhost:3000/api/users/purchaseCancel`,
+        });
+        console.log(session);
+        for (const x of cartitems) {
+          await userSchema.updateOne(
+            { _id: res.token.id },
+            { $push: { order: x } }
+          );
+        }
+        res.redirect(200,session.url);
+        
+      } else {
+        res.json({Failed:"Cart empty"})
+      }
     } catch (error) {
       next(error)
     }
@@ -219,7 +229,7 @@ module.exports = {
   },
   success:async (req,res,next)=>{
     try {
-      res.json({status:JSON.stringify(req.query.data)})
+      res.json({status:JSON.stringify(req.params.data)})
     } catch (error) {
       next(error)
     }

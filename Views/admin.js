@@ -1,8 +1,9 @@
 const express = require("express");
 const adminrouter = express.Router();
+const auth=require('../middlewares/adminAuth')
 const {
   login,
-  auth,
+  
   viewUsers,
   viewUsersById,
   ViewProductById,
