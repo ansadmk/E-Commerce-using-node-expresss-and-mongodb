@@ -1,26 +1,34 @@
 const userSchema = require("../Models/UserSchema");
 const productSchema = require("../Models/ProductSchema");
 const jwt = require("jsonwebtoken");
+const {productvalidate,userValidate}=require('../Models/validate')
 require("dotenv").config();
+var temp;
 
 module.exports = {
   register: async (req, res,next) => {
-    try {
-      const { username, password, email } = req.body;
+    const {error,value}=userValidate.validate(req.body)
+    const { username, password,email } = value;
+    if (error) {
+      res.status(400).json(error.details[0].message)
+    }else{
+     
       await userSchema.create({
         username: username,
         email: email,
         password: password,
       });
       res.json({ status: "success" });
-    } catch (error) {
-      next(error)
     }
   },
   login: async (req, res,next) => {
-
-    try {
-      const { username, password } = req.body;
+    const {error,value}=userValidate.validate(req.body)
+    const { username, password } = value;
+    if (error) {
+      res.status(400).json(error.details[0].message)
+    }else{
+    
+      
       const user = await userSchema.find({
         username: username,
         password: password,
@@ -34,30 +42,11 @@ module.exports = {
           jwt_token: token,
         });
       }
-    } catch (error) {
-      next(error)
     }
   },
-  auth: (req, res, next) => {
-    try {
-      const auth = req.headers["authorization"];
-      const token = auth && auth.split(" ")[1];
-      if (token) {
-        const verify = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-
-        if (verify) {
-          res.token=verify
-          next();
-        }
-      } else {
-        res.sendStatus(401);
-      }
-    } catch (error) {
-      next(error)
-    }
-  },
+  
   ViewProducts: async (req, res,next) => {
-    try {
+    
       
       const foundProducts = await productSchema.find();
   
@@ -67,12 +56,10 @@ module.exports = {
         res.json("Notfound");
         res.sendStatus(204);
       }
-    } catch (error) {
-      next(error)
-    }
+    
   },
   ViewProductsByCatagory: async (req, res,next) => {
-    try {
+    
       const foundProducts = await productSchema.find({
         category: req.params.categoryname,
       });
@@ -83,12 +70,10 @@ module.exports = {
         res.json("Notfound");
         res.sendStatus(204);
       }
-    } catch (error) {
-      next(error)
-    }
+    
   },
   ViewProductById: async (req, res,next) => {
-    try {
+    
       const prod = await productSchema.findById(req.params.id);
         if (prod) {
           
@@ -96,12 +81,10 @@ module.exports = {
         } else {
           res.sendStatus(404)
         }
-    } catch (error) {
-      next(error)
-    }
+    
   },
   addToCart: async (req, res,next) => {
-    try {
+    
       const user = await userSchema.find({ _id: req.params.id });
       if (user) {
         for (const x of req.body.product) {
@@ -117,12 +100,10 @@ module.exports = {
       } else {
         res.sendStatus(401);
       }
-    } catch (error) {
-      next(error)
-    }
+    
   },
   showCart: async (req, res,next) => {
-    try {
+    
       const user = await userSchema.find({ _id: req.params.id }).populate("cart");
   
       if (user) {
@@ -130,12 +111,10 @@ module.exports = {
       } else {
         res.sendStatus(404);
       }
-    } catch (error) {
-      next(error)
-    }
+    
   },
   addToWishList: async (req, res,next) => {
-    try {
+    
       const user = await userSchema.find({ _id: req.params.id });
       if (user) {
         for (const x of req.body.product) {
@@ -151,12 +130,10 @@ module.exports = {
       } else {
         res.sendStatus(401);
       }
-    } catch (error) {
-      next(error)
-    }
+    
   },
   showWishList: async (req, res,next) => {
-    try {
+    
       const user = await userSchema
         .find({ _id: req.params.id })
         .populate("wishlist");
@@ -166,12 +143,10 @@ module.exports = {
       } else {
         res.sendStatus(404);
       }
-    } catch (error) {
-      next(error)
-    }
+    
   },
   deletewishListItems: async (req, res,next) => {
-    try {
+    
       const user = await userSchema.find({ _id: req.params.id });
       if (user) {
         await userSchema.updateOne(
@@ -182,16 +157,15 @@ module.exports = {
       } else {
         res.sendStatus(404);
       }
-    } catch (error) {
-      next(error)
-    }
+    
   },
   stripe:async (req,res,next)=>{
-    try {
+    
       const stripe=require('stripe')(process.env.STRIPE_SECRET_KEY)
       const user=await userSchema.find({_id:res.token.id}).populate('cart') 
       const cartitems= user[0].cart.map((a)=>{
-        return {price_data: {
+        return {
+          price_data: {
           currency: 'usd',
           product_data: {
             name: a.title,
@@ -207,39 +181,33 @@ module.exports = {
         const session = await stripe.checkout.sessions.create({
           line_items: cartitems,
           mode: 'payment',
-          success_url: `http://localhost:3000/api/users/purchaseSuccess/${this}`,
+          success_url: `http://localhost:3000/api/users/purchaseSuccess`,
           cancel_url: `http://localhost:3000/api/users/purchaseCancel`,
         });
-        console.log(session);
-        for (const x of cartitems) {
-          await userSchema.updateOne(
-            { _id: res.token.id },
-            { $push: { order: x } }
-          );
-        }
+        temp={cartproducts:user[0].cart,session:session}
+        // for (const x of cartitems) {
+        //   await userSchema.updateOne(
+        //     { _id: res.token.id },
+        //     { $push: { order: x } }
+        //   );
+        // }
         res.redirect(200,session.url);
         
       } else {
         res.json({Failed:"Cart empty"})
       }
-    } catch (error) {
-      next(error)
-    }
+    
     
   },
   success:async (req,res,next)=>{
-    try {
-      res.json({status:JSON.stringify(req.params.data)})
-    } catch (error) {
-      next(error)
-    }
+    
+      res.json(JSON.stringify(temp))
+    
   },
   cancel:async (req,res,next)=>{
-    try {
+    
       res.json({status:"failed"})
-    } catch (error) {
-      next(error)
-    }
+    
   }
 
 };
