@@ -184,7 +184,7 @@ module.exports = {
           success_url: `http://localhost:3000/api/users/purchaseSuccess`,
           cancel_url: `http://localhost:3000/api/users/purchaseCancel`,
         });
-        temp={cartproducts:user[0].cart,session:session}
+        temp={cartproducts:user[0].cart,session:session,id:res.token.id}
         // for (const x of cartitems) {
         //   await userSchema.updateOne(
         //     { _id: res.token.id },
@@ -192,6 +192,7 @@ module.exports = {
         //   );
         // }
         res.redirect(200,session.url);
+        console.log(session);
         
       } else {
         res.json({Failed:"Cart empty"})
@@ -200,8 +201,22 @@ module.exports = {
     
   },
   success:async (req,res,next)=>{
-    
-      res.json(JSON.stringify(temp))
+    if(temp){
+    await userSchema.updateOne({_id:temp.id},{$push:{orders:{
+     products: temp.cartproducts,
+     date: new Date(),
+     order_id: Math.random(),
+     payment_id: temp.session.id,
+     totalAmount:temp.session.amount_total / 100,     
+    }}})
+   res.json({
+     products: temp.cartproducts,
+     date: new Date(),
+     totalAmount:temp.session.amount_total / 100,
+     payment_id: temp.session.id,   
+     userId:temp.id  
+    })
+  }
     
   },
   cancel:async (req,res,next)=>{
