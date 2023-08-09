@@ -1,16 +1,16 @@
 const Joi = require("joi")
 const productvalidate=Joi.object({
-    title:Joi.string(),
-    description:Joi.string(),
-    price:Joi.number(),
-    image:Joi.string(),
-    category:Joi.string()
+    title:Joi.string().required(),
+    description:Joi.string().required(),
+    price:Joi.number().required(),
+    image:Joi.string().required(),
+    category:Joi.string().required()
 
 })
 const userValidate=Joi.object({
-    username:Joi.string(),
+    username:Joi.string().required(),
     email:Joi.string(),
-    password:Joi.string()
+    password:Joi.string().required()
     
 
 })

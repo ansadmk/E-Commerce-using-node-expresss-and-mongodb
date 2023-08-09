@@ -163,4 +163,8 @@ module.exports = {
       }
     
   },
+  stats:async (req,res)=>{
+    const details =await userSchema.count([{"$project":{"count":{"$size":"$orders"}}}])
+    res.json(details)
+  }
 };

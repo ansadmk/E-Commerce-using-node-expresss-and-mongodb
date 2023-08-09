@@ -18,7 +18,11 @@ module.exports = {
         email: email,
         password: password,
       });
-      res.json({ status: "success" });
+      res.status(200).json({
+        status: 'success',
+        message: 'Successfully created an account.',
+        
+        })
     }
   },
   login: async (req, res,next) => {
@@ -33,14 +37,18 @@ module.exports = {
         username: username,
         password: password,
       });
+      console.log(user);
       const userdetails = {
         id:user[0]._id
       };
       const token = jwt.sign(userdetails, process.env.ACCESS_TOKEN_SECRET);
       if (token) {
-        res.json({
-          jwt_token: token,
-        });
+        res.status(200).json({
+          status: 'success',
+          message: 'Successfully logged In.',
+          data: {jwt_token: token}
+          })
+        
       }
     }
   },
@@ -51,10 +59,17 @@ module.exports = {
       const foundProducts = await productSchema.find();
   
       if (foundProducts) {
-        res.json(foundProducts);
+        res.status(200).json({
+          status: 'success',
+          message: 'Successfully fetched products detail.',
+          data: foundProducts
+          })
       } else {
-        res.json("Notfound");
-        res.sendStatus(204);
+        res.status(204).json({
+          status: 'failed',
+          message: 'failed to fetch products detail.',
+          
+          })
       }
     
   },
@@ -65,10 +80,17 @@ module.exports = {
       });
       console.log(req.params.categoryname);
       if (foundProducts) {
-        res.json(foundProducts);
+        res.status(200).json({
+          status: 'success',
+          message: 'Successfully fetched products detail.',
+          data: foundProducts
+          })
       } else {
-        res.json("Notfound");
-        res.sendStatus(204);
+        res.status(204).json({
+          status: 'failed',
+          message: 'failed to fetch products detail.',
+          
+          })
       }
     
   },
@@ -77,9 +99,17 @@ module.exports = {
       const prod = await productSchema.findById(req.params.id);
         if (prod) {
           
-          res.json(prod);
+          res.status(200).json({
+            status: 'success',
+            message: 'Successfully fetched products detail.',
+            data: prod
+            })
         } else {
-          res.sendStatus(404)
+          res.status(204).json({
+            status: 'failed',
+            message: 'failed to fetch products detail.',
+            
+            })
         }
     
   },
@@ -94,9 +124,10 @@ module.exports = {
           );
         }
   
-        res.json({
-          status: "success",
-        });
+        res.status(201).json({
+          status: 'success',
+          message: 'Successfully added  products to cart.',
+          })
       } else {
         res.sendStatus(401);
       }
@@ -107,7 +138,13 @@ module.exports = {
       const user = await userSchema.find({ _id: req.params.id }).populate("cart");
   
       if (user) {
-        res.json(user[0].cart);
+
+        res.status(200).json({
+          status: 'success',
+          message: 'Successfully fetched cart detail.',
+          data: user[0].cart
+          })
+        
       } else {
         res.sendStatus(404);
       }
@@ -124,9 +161,10 @@ module.exports = {
           );
         }
   
-        res.json({
-          status: "success",
-        });
+        res.status(201).json({
+          status: 'success',
+          message: 'Successfully added products to wishlist.',
+          })
       } else {
         res.sendStatus(401);
       }
@@ -139,7 +177,12 @@ module.exports = {
         .populate("wishlist");
   
       if (user) {
-        res.json(user[0].wishlist);
+        res.status(200).json({
+          status: 'success',
+          message: 'Successfully fetched wishlist detail.',
+          data: user[0].wishlist
+          })
+        
       } else {
         res.sendStatus(404);
       }
@@ -153,7 +196,10 @@ module.exports = {
           { _id: req.params.id },
           { $pull: { wishlist: req.body._id } }
         );
-        res.json({ status: "success" });
+        res.status(201).json({
+          status: 'success',
+          message: 'Successfully deleted product.',
+          })
       } else {
         res.sendStatus(404);
       }
@@ -187,7 +233,7 @@ module.exports = {
         temp={cartproducts:user[0].cart,session:session,id:res.token.id}
         
         res.redirect(200,session.url);
-        console.log(session);
+        
         
       } else {
         res.json({Failed:"Cart empty"})

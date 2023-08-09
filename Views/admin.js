@@ -12,6 +12,7 @@ const {
   createProduct,
   updateProducts,
   deleteProduct,
+  stats
 } = require("../Controller/adminController");
 
 adminrouter.post("/login", handle(login));
@@ -27,6 +28,6 @@ adminrouter.get("/products/:id", auth,handle(ViewProductById));
 adminrouter.post("/products", auth, handle(createProduct));
 adminrouter.put("/products", auth, handle(updateProducts));
 adminrouter.delete("/products", auth, handle(deleteProduct));
-adminrouter.get("/stats", auth);
+adminrouter.get("/stats", auth,stats);
 adminrouter.get("/orders", auth);
 module.exports = adminrouter;
