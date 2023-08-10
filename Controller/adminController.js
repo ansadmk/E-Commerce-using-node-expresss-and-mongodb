@@ -185,6 +185,15 @@ module.exports = {
     });
   },
   showorders: async (req, res) => {
-    
+    const orderDetails=await userSchema.aggregate([{$group:{_id:'$orders'}}])
+   const prod= orderDetails.map((item)=>{
+      if(item._id.length!=0){
+       return item._id}
+      } )
+    res.json({
+      status: 'success',
+      message: 'Successfully fetched order detail.',
+      data: prod
+      })
   },
 };
