@@ -145,9 +145,6 @@ module.exports = {
     }
   },
   stats: async (req, res) => {
-    // const NoOfOrders =await userSchema.aggregate([{"$project":{username:1,countall:{$size:"$orders"}}},{$group:{_id:null,sum:{$sum:"$countall"}}}])
-    // const NoOfProducts =await userSchema.aggregate([{$unwind:"$orders"},{"$project":{username:1,countall:{$size:"$orders.products"}}},{$group:{_id:null,sum:{$sum:"$countall"}}}])
-    // const Revenue =await userSchema.aggregate([{$unwind:"$orders"},{$group:{_id:null,sum:{"$sum":"$orders.totalAmount"}}}])
     const details = await userSchema.aggregate([
       {
         $facet: {
@@ -186,7 +183,7 @@ module.exports = {
   },
   showorders: async (req, res) => {
     const orderDetails=await userSchema.aggregate([{$group:{_id:'$orders'}}])
-   const prod= orderDetails.map((item)=>{
+   const prod= orderDetails.filter((item)=>{
       if(item._id.length!=0){
        return item._id}
       } )
