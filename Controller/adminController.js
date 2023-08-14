@@ -2,7 +2,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const userSchema = require("../Models/UserSchema");
 const productSchema = require("../Models/ProductSchema");
-const { productvalidate, userValidate } = require("../Models/validate");
+const { productvalidate } = require("../Models/validate");
 
 module.exports = {
   login: (req, res) => {
@@ -182,15 +182,18 @@ module.exports = {
     });
   },
   showorders: async (req, res) => {
-    const orderDetails=await userSchema.aggregate([{$group:{_id:'$orders'}}])
-   const prod= orderDetails.filter((item)=>{
-      if(item._id.length!=0){
-       return item._id}
-      } )
+    const orderDetails = await userSchema.aggregate([
+      { $group: { _id: "$orders" } },
+    ]);
+    const prod = orderDetails.filter((item) => {
+      if (item._id.length != 0) {
+        return item._id;
+      }
+    });
     res.json({
-      status: 'success',
-      message: 'Successfully fetched order detail.',
-      data: prod
-      })
+      status: "success",
+      message: "Successfully fetched order detail.",
+      data: prod,
+    });
   },
 };
