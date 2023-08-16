@@ -250,6 +250,7 @@ module.exports = {
      payment_id: temp.session.id,
      totalAmount:temp.session.amount_total / 100,     
     }}})
+    await userSchema.updateOne({_id:temp.id},{$set:{cart:[]}})
    res.json({
      products: temp.cartproducts,
      date: new Date(),
