@@ -252,11 +252,8 @@ module.exports = {
     }}})
     await userSchema.updateOne({_id:temp.id},{$set:{cart:[]}})
    res.json({
-     products: temp.cartproducts,
-     date: new Date(),
-     totalAmount:temp.session.amount_total / 100,
-     payment_id: temp.session.id,   
-     userId:temp.id  
+    status: 'success',
+    message: 'Successfully purchased products',
     })
   }
     
