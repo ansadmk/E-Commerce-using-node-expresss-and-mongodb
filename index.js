@@ -1,8 +1,8 @@
 require("dotenv").config();
 const express=require('express')
 const bodyparser=require('body-parser')
-const userrouter=require('./Views/user')
-const adminrouter=require('./Views/admin')
+const userrouter=require('./Routes/user')
+const adminrouter=require('./Routes/admin')
 const app=express()
 const mongoose=require('mongoose')
 mongoose.connect(process.env.DATABASE_ADDRESS);

@@ -254,13 +254,20 @@ module.exports = {
    res.json({
     status: 'success',
     message: 'Successfully purchased products',
+    details:{
+      payment_id: temp.session.id,
+     totalAmount:`$${temp.session.amount_total / 100}`
+    }
+
+    
     })
   }
     
   },
   cancel:async (req,res,next)=>{
     
-      res.json({status:"failed"})
+      res.json({status: 'failed',
+      message: 'failed in purchasing products'})
     
   }
 
