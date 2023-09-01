@@ -21,7 +21,7 @@ adminrouter.get("/users", auth,handle(viewUsers) );
 adminrouter.get("/users/:id", auth, handle(viewUsersById));
 adminrouter.get("/products", auth, handle(ViewProducts));
 adminrouter.get(
-  "/products/category/:categoryname",
+  "/product",
   auth,
  handle(ViewProductsByCatagory)
 );

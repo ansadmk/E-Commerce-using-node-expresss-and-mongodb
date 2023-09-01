@@ -64,7 +64,7 @@ module.exports = {
   },
   ViewProductsByCatagory: async (req, res) => {
     const foundProducts = await productSchema.find({
-      category: req.params.categoryname,
+      category: req.query.category,
     });
 
     if (foundProducts) {

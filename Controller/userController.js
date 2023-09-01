@@ -1,58 +1,79 @@
 const userSchema = require("../Models/UserSchema");
 const productSchema = require("../Models/ProductSchema");
 const jwt = require("jsonwebtoken");
+const bcrypt=require('bcrypt')
 const {productvalidate,userValidate}=require('../Models/validate')
 require("dotenv").config();
+
 var temp;
 
 module.exports = {
-  register: async (req, res,next) => {
-    const {error,value}=userValidate.validate(req.body)
-    const { username, password,email } = value;
+  register: async (req, res, next) => {
+    const { error, value } = userValidate.validate(req.body);
+    const { username, password, email } = value;
     if (error) {
-      res.status(400).json(error.details[0].message)
-    }else{
-     
-      await userSchema.create({
-        username: username,
-        email: email,
-        password: password,
-      });
-      res.status(200).json({
-        status: 'success',
-        message: 'Successfully created an account.',
-        
-        })
-    }
-  },
-  login: async (req, res,next) => {
-    const {error,value}=userValidate.validate(req.body)
-    const { username, password } = value;
-    if (error) {
-      res.status(400).json(error.details[0].message)
-    }else{
-    
-      
-      const user = await userSchema.find({
-        username: username,
-        password: password,
-      });
+      res.status(400).json(error.details[0].message);
+    } else {
+      const user = await userSchema.exists({ username: username });
       console.log(user);
-      const userdetails = {
-        id:user[0]._id
-      };
-      const token = jwt.sign(userdetails, process.env.ACCESS_TOKEN_SECRET);
-      if (token) {
+      if (user) {
+        res.json({
+          message: "username or email taken",
+        });
+      } else {
+        bcrypt.hash(password, 10, async function (err, hash) {
+          await userSchema.create({
+            username: username,
+            email: email,
+            password: hash,
+          });
+        });
         res.status(200).json({
-          status: 'success',
-          message: 'Successfully logged In.',
-          data: {jwt_token: token}
-          })
-        
+          status: "success",
+          message: "Successfully created an account.",
+        });
       }
     }
   },
-  
+  login: async (req, res, next) => {
+    const { error, value } = userValidate.validate(req.body);
+    const { username, password } = value;
+    if (error) {
+      res.status(400).json(error.details[0].message);
+    } else {
+      const user = await userSchema.findOne({
+        username:username
+      });
+      if (user) {
+        
+        bcrypt.compare(password, user.password, (err, result) => {
+          if (result) {
+            const userdetails = {
+              id: user._id,
+            };
+            const token = jwt.sign(
+              userdetails,
+              process.env.ACCESS_TOKEN_SECRET
+              );
+              if (token) {
+                res.status(200).json({
+                  status: "success",
+                  message: "Successfully logged In.",
+                  data: { jwt_token: token },
+                });
+              }
+            } else {
+              res.json({ err: "failure" });
+            }
+          });
+        } else {
+          res.json({
+            message: "user Does not exists",
+          });
+        }
+    }
+  },
+
   ViewProducts: async (req, res,next) => {
     
       
